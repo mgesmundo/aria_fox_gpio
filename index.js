@@ -1,0 +1,1 @@
+module.exports = require('./lib/aria_fox_gpio.js');

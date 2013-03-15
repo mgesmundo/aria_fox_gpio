@@ -1,0 +1,46 @@
+{
+    "name": "aria_fox_gpio",
+    "description": "Acmesystems Aria/Fox GPIO manager",
+    "preferGlobal": "false",
+    "version": "1.0.0",
+    "author": {
+        "name": "Marcello Gesmundo",
+        "email": "mgesmundo@yoovant.com",
+        "url": "http://www.yoovant.com"
+    },
+    "keywords": [
+        "gpio",
+        "embedded",
+        "interrupt",
+        "interrupts",
+        "aria",
+        "fox",
+        "daisy",
+        "acmesystsems",
+        "arm",
+        "linux"
+    ],
+    "os": [
+        "linux"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mgesmundo/aria_fox_gpio.git"
+    },
+    "bugs": {
+        "url": "https://github.com/mgesmundo/aria_fox_gpio/issues"
+    },
+    "main": "./index.js",
+    "dependencies" : {
+        "chic": ">=1.0.2",
+        "chic-event": ">=0.0.1",
+        "object_utils": ">=0.1.0",
+        "mkdirp": ">=0.3.4"
+    },
+    "analyze": false,
+    "license": "MIT",
+    "engines": {
+        "node": ">=0.8"
+    },
+    "readmeFilename": "README.md"
+}
