@@ -2,7 +2,7 @@
     "name": "aria_fox_gpio",
     "description": "Acmesystems Aria/Fox GPIO manager",
     "preferGlobal": "false",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": {
         "name": "Marcello Gesmundo",
         "email": "mgesmundo@yoovant.com",
