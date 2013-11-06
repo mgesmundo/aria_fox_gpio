@@ -113,6 +113,7 @@ module.exports = function(config) {
                                         if (edge !== 'none') {
                                             // add watcher
                                             self.watcher = new Watcher(kernelId, persistent, debounce);
+                                            logger.debug(my.name + ' debug: created new watcher for GPIO ' + kernelId);
                                             self.watcher.watch(function(watchErr, watchValue) {
                                                 watchValue += '';
                                                 if (watchValue === '1') {
@@ -224,13 +225,13 @@ module.exports = function(config) {
                 self.pin = pin;
                 if (!my.pins[kernelId]) {                    
                     // verify path and create it if missing
-                    fs.exists(my.gpioPathBase, function(exists) {
+                    fs.exists(my.getGpioPath(kernelId), function(exists) {
                         if (!exists &amp;&amp; test) {
-                            mkdirp(my.gpioPathBase, function(existsErr) {
+                            mkdirp(my.getGpioPath(kernelId), function(existsErr) {
                                 if (!existsErr) {
                                     self._init(kernelId, direction, edge, persistent, debounce, callback);
                                 } else {
-                                    err = my.name + ' error: GPIO path ' + my.gpioPathBase + ' not found.';
+                                    err = my.name + ' error: GPIO path ' + my.getGpioPath(kernelId) + ' not found.';
                                     logger.error(err);
                                     callback.call(self, err);
                                     my.emitInit(err, self);

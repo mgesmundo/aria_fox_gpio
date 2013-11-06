@@ -53,10 +53,11 @@
  */
 var spawn = require('child_process').spawn;
 var path  = require('path');
+var kernel = require('./kernel')();
 
 var Watcher = function(kernelId, persistent, debounce) {
     this.kernelId = kernelId;
-    this.gpio = '/sys/class/gpio/gpio' + kernelId;
+    this.gpio = kernel.getGpioPath(kernelId);
     this.persistent = persistent || false;
     this.debounce = debounce || 0;
 };

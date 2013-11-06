@@ -85,7 +85,7 @@ module.exports = function(config) {
          */
         debug : false,
 <span id='node_modules-aria_fox_gpio-cfg-logger'>        /**
-</span>         * @cfg {Object} logger The logger use in debug mode
+</span>         * @cfg {Object} logger The logger used in debug mode
          */
         logger: console,
 <span id='node_modules-aria_fox_gpio-cfg-persistent'>        /**
@@ -109,13 +109,25 @@ module.exports = function(config) {
         logger = my.config.logger;
 
     if (model !== 'aria' &amp;&amp; model !== 'fox') {
-        throw new Error('wrong model!');
+        throw new Error('Only aria or fox model allowed.');
     }
 
     var kernel = require('./kernel')(model);
 
     // default path
-    my.gpioPathBase = (test ? 'foxemulator' : '') + '/sys/class/gpio';
+    my.gpioExpUnexpPath = kernel.gpioExpUnexpPath;
+
+<span id='node_modules-aria_fox_gpio-method-getGpioPath'>    /**
+</span>     * @param {Number} kernelId The kernel id
+     * @return {String} The path for gpio if the corresponding kernel id
+     */
+    my.getGpioPath = function (kernelId) {
+        if (kernel.legacy) {
+            // foxemulator support only Linux kernel 2.x
+            return (test &amp;&amp; model === 'fox' ? 'foxemulator' : '') + '/sys/class/gpio/gpio' + kernelId;
+        }
+        return kernel.getGpioPath(kernelId);
+    };
     
     // empty function
     var emptyFn = function() {};
@@ -165,11 +177,14 @@ module.exports = function(config) {
     my.export = function(kernelId, callback) {
         var self = this;
         callback = callback || emptyFn;
-        var gpioPath = my.gpioPathBase + '/gpio' + kernelId;
+        var gpioPath = my.getGpioPath(kernelId);
         fs.exists(gpioPath, function(exists){
             logger.debug(my.name + ' debug: export GPIO ' + kernelId);
             if (!exists) {
-                fs.writeFile(my.gpioPathBase + '/export', kernelId, function(writeErr){
+                if (! kernel.legacy) {
+                    kernelId -= 32;
+                }
+                fs.writeFile(my.gpioExpUnexpPath + '/export', kernelId, function(writeErr){
                     if (writeErr) {
                         logger.error(my.name + ' error: ' + writeErr);
                     }
@@ -192,11 +207,14 @@ module.exports = function(config) {
     my.unexport = function(kernelId, callback) {
         var self = this;
         callback = callback || emptyFn;
-        var gpioPath = my.gpioPathBase + '/gpio' + kernelId;
+        var gpioPath = my.getGpioPath(kernelId);
         fs.exists(gpioPath, function(exists){
             logger.debug(my.name + ' debug: unexport GPIO ' + kernelId);
             if (exists) {
-                fs.writeFile(my.gpioPathBase + '/unexport', kernelId, function(writeErr) {
+                if (! kernel.legacy) {
+                    kernelId -= 32;
+                }
+                fs.writeFile(my.gpioExpUnexpPath + '/unexport', kernelId, function(writeErr) {
                     if (writeErr) {
                         logger.error(my.name + ' error: ' + writeErr);
                     }
@@ -237,7 +255,7 @@ module.exports = function(config) {
         if (my.attributes[name]) {
             var attribute = my.attributes[name];
             if (attribute.indexOf(value) &gt; -1) {
-                var gpioPath = my.gpioPathBase + '/gpio' + kernelId;
+                var gpioPath = my.getGpioPath(kernelId);
                 var doWrite = function() {
                     value += '';
                     value = value.replace(/[^A-Za-z0-9]/g, '');
@@ -295,9 +313,9 @@ module.exports = function(config) {
         logger.debug(my.name + ' debug: get value of ' + name + ' for GPIO ' + kernelId);
         if (my.attributes[name]) {
             var attribute = my.attributes[name];
-            var ioPath = my.gpioPathBase + '/gpio' + kernelId;
+            var gpioPath = my.getGpioPath(kernelId);
             var doRead = function() {
-                fs.readFile(ioPath + '/' + name, function(readErr, value) {
+                fs.readFile(gpioPath + '/' + name, function(readErr, value) {
                     value += '';
                     value = value.replace(/[^A-Za-z0-9]/g, '');
                     if (!(attribute.indexOf(value) &gt; -1)) {
@@ -307,9 +325,9 @@ module.exports = function(config) {
                     callback.call(self, readErr, value);
                 });
             };
-            fs.exists(ioPath, function(exists){
+            fs.exists(gpioPath, function(exists){
                 if (!exists &amp;&amp; test) {
-                    fs.mkdir(ioPath, function(dirErr) {
+                    fs.mkdir(gpioPath, function(dirErr) {
                         if (!dirErr) {
                             doRead();
                         } else {
@@ -321,7 +339,7 @@ module.exports = function(config) {
                 } else if (exists) {
                     doRead();
                 } else {
-                    err = my.name + ' error: GPIO path ' + ioPath + ' not found.';
+                    err = my.name + ' error: GPIO path ' + gpioPath + ' not found.';
                     logger.error(err);
                     callback.call(self, err);
                 }
