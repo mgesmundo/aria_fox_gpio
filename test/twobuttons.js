@@ -1,9 +1,9 @@
 var Button = require('../lib/aria_fox_gpio')({
-    model: 'fox',
+    model: 'aria',
     debug: true
 }).InGpio;
 
-var button1 = new Button('D5','2', function() {
+var button1 = new Button('D12','2', function() {
     console.log('init callback button #1');
 });
 
@@ -23,7 +23,7 @@ button1.attach('change', function(event) {
     console.log('change button #1: ' + event.data.value);
 });
 
-var button2 = new Button('D5', '3', function() {
+var button2 = new Button('D12', '3', function() {
     console.log('init callback button #2');
 });
 
